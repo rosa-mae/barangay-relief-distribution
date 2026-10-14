@@ -124,7 +124,7 @@ ORDER BY name ASC"
             <main class="col-md-9 col-lg-10 main-content">
 
                 <div class="mb-4">
-                    <h2>Relief Distribution</h2>
+                    <h2>📦 Relief Distribution</h2>
                     <p class="text-muted mb-0">
                         Record relief goods distributed to beneficiaries.
                     </p>

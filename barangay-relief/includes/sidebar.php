@@ -4,7 +4,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <aside class="col-md-3 col-lg-2 sidebar p-0">
     <div class="sidebar-header">
-        <h4>Barangay Relief</h4>
+        <h4>🏡 Barangay Relief</h4>
         <small>Distribution Monitoring System</small>
     </div>
 

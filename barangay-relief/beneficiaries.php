@@ -34,7 +34,7 @@ $result = mysqli_query(
 
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                     <div>
-                        <h2>Beneficiaries</h2>
+                        <h2>👥 Beneficiaries</h2>
                         <p class="text-muted mb-0">Manage registered beneficiary families.</p>
                     </div>
 
