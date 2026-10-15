@@ -1,12 +1,40 @@
 <?php
-
 require_once "config/database.php";
 
-$result = mysqli_query(
-    $conn,
-    "SELECT * FROM beneficiaries ORDER BY id DESC"
-);
+$search = trim($_GET['search'] ?? '');
 
+if ($search !== '') {
+    $keyword = "%{$search}%";
+
+    $stmt = mysqli_prepare(
+        $conn,
+        "SELECT * FROM beneficiaries
+         WHERE CAST(id AS CHAR) LIKE ?
+         OR name LIKE ?
+         OR address LIKE ?
+         OR purok LIKE ?
+         OR contact_number LIKE ?
+         ORDER BY id DESC"
+    );
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "sssss",
+        $keyword,
+        $keyword,
+        $keyword,
+        $keyword,
+        $keyword
+    );
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+} else {
+    $result = mysqli_query(
+        $conn,
+        "SELECT * FROM beneficiaries ORDER BY id DESC"
+    );
+}
 ?>
 
 <!DOCTYPE html>
@@ -35,7 +63,9 @@ $result = mysqli_query(
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                     <div>
                         <h2>👥 Beneficiaries</h2>
-                        <p class="text-muted mb-0">Manage registered beneficiary families.</p>
+                        <p class="text-muted mb-0">
+                            Manage registered beneficiary families.
+                        </p>
                     </div>
 
                     <a href="add_beneficiary.php" class="btn btn-primary">
@@ -47,6 +77,36 @@ $result = mysqli_query(
                     <div class="card-body">
 
                         <h5 class="card-title mb-3">Beneficiary List</h5>
+
+                        <!-- Search Form -->
+                        <form method="GET" action="beneficiaries.php" class="row g-2 mb-4">
+
+                            <div class="col-12 col-md-8 col-lg-9">
+                                <input type="search" name="search" class="form-control"
+                                    placeholder="Search name, address, purok, contact or ID..."
+                                    value="<?php echo htmlspecialchars($search); ?>">
+                            </div>
+
+                            <div class="col-6 col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    🔍 Search
+                                </button>
+                            </div>
+
+                            <div class="col-6 col-md-2">
+                                <a href="beneficiaries.php" class="btn btn-secondary w-100">
+                                    Reset
+                                </a>
+                            </div>
+
+                        </form>
+
+                        <?php if ($search !== '') { ?>
+                            <p class="text-muted mb-3">
+                                Search results for:
+                                <strong><?php echo htmlspecialchars($search); ?></strong>
+                            </p>
+                        <?php } ?>
 
                         <div class="table-container">
                             <div class="table-responsive">
@@ -68,17 +128,34 @@ $result = mysqli_query(
 
                                     <tbody>
 
-                                        <?php if (mysqli_num_rows($result) > 0) { ?>
+                                        <?php if ($result && mysqli_num_rows($result) > 0) { ?>
 
                                             <?php while ($row = mysqli_fetch_assoc($result)) { ?>
 
                                                 <tr>
-                                                    <td><?php echo htmlspecialchars($row['id']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['name']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['address']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['purok']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['household_size']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['contact_number'] ?? ''); ?></td>
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['id']); ?>
+                                                    </td>
+
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['name']); ?>
+                                                    </td>
+
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['address']); ?>
+                                                    </td>
+
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['purok']); ?>
+                                                    </td>
+
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['household_size']); ?>
+                                                    </td>
+
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['contact_number'] ?? ''); ?>
+                                                    </td>
 
                                                     <td>
                                                         <?php if ($row['status'] == 'Received') { ?>
@@ -90,6 +167,7 @@ $result = mysqli_query(
 
                                                     <td>
                                                         <div class="d-flex flex-wrap gap-1">
+
                                                             <a href="edit_beneficiary.php?id=<?php echo $row['id']; ?>"
                                                                 class="btn btn-warning btn-sm">
                                                                 Edit
@@ -100,6 +178,7 @@ $result = mysqli_query(
                                                                 onclick="return confirm('Are you sure you want to delete this beneficiary?');">
                                                                 Delete
                                                             </a>
+
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -109,7 +188,7 @@ $result = mysqli_query(
                                         <?php } else { ?>
 
                                             <tr>
-                                                <td colspan="8" class="text-center text-muted py-4">
+                                                <td colspan="8" class="text-center py-4">
                                                     No beneficiaries found.
                                                 </td>
                                             </tr>
@@ -126,7 +205,6 @@ $result = mysqli_query(
                 </div>
 
             </main>
-
         </div>
     </div>
 
